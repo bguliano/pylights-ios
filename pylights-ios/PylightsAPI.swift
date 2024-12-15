@@ -12,7 +12,7 @@ enum PylightsAPIError: Error {
     case invalidURL
 }
 
-class PylightsAPIClient {
+class PylightsAPIClient: ObservableObject {
     private let baseURL: URL
     private let baseEndpoint = "/pylights-api"
     
@@ -22,6 +22,8 @@ class PylightsAPIClient {
     lazy var remap = RemapModule(client: self)
     lazy var developer = DeveloperModule(client: self)
     
+    @Published var isLoading: Bool = false
+    
     init(baseURL: String) throws {
         guard let url = URL(string: baseURL) else {
             throw PylightsAPIError.invalidURL
@@ -30,6 +32,9 @@ class PylightsAPIClient {
     }
     
     func makeRequest<T: Codable>(endpoint: String, queryParams: [String: String]? = nil, completion: @escaping (Result<T, Error>) -> Void) {
+        isLoading = true
+        defer { isLoading = false }
+        
         var urlComponents = URLComponents(url: baseURL.appendingPathComponent(baseEndpoint + endpoint), resolvingAgainstBaseURL: false)!
         if let queryParams {
             urlComponents.queryItems = queryParams.map { URLQueryItem(name: $0.key, value: $0.value) }
@@ -43,14 +48,34 @@ class PylightsAPIClient {
                 return
             }
             
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(NSError(domain: "PylightsAPIClient", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
+                return
+            }
+            
             guard let data else {
                 completion(.failure(NSError(domain: "PylightsAPIClient", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
                 return
             }
             
+            if httpResponse.statusCode != 200 {
+                do {
+                    // Attempt to decode the error message from the JSON response
+                    if let errorResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+                       let errorMessage = errorResponse["error"] {
+                        completion(.failure(NSError(domain: "PylightsAPIClient", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage])))
+                    } else {
+                        // Fallback to a generic error message if JSON decoding fails
+                        let genericError = "HTTP \(httpResponse.statusCode): Unknown error"
+                        completion(.failure(NSError(domain: "PylightsAPIClient", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: genericError])))
+                    }
+                }
+                return
+            }
+            
             do {
                 let decoder = JSONDecoder()
-//                print(String(data: data, encoding: .utf8))
+                // print(String(data: data, encoding: .utf8))
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let result = try decoder.decode(T.self, from: data)
                 completion(.success(result))
@@ -73,20 +98,24 @@ class PylightsAPIClient {
             self.client = client
         }
         
-        func play(name: String, completion: @escaping (Result<SongDescriptor, Error>) -> Void) {
+        func play(name: String, completion: @escaping (Result<SongsDescriptor, Error>) -> Void) {
             client.makeRequest(endpoint: "/songs/play", queryParams: ["name": name], completion: completion)
         }
         
-        func pause(completion: @escaping (Result<SongDescriptor, Error>) -> Void) {
+        func pause(completion: @escaping (Result<SongsDescriptor, Error>) -> Void) {
             client.makeRequest(endpoint: "/songs/pause", completion: completion)
         }
         
-        func resume(completion: @escaping (Result<SongDescriptor, Error>) -> Void) {
+        func resume(completion: @escaping (Result<SongsDescriptor, Error>) -> Void) {
             client.makeRequest(endpoint: "/songs/resume", completion: completion)
         }
         
-        func stop(completion: @escaping (Result<SongDescriptor, Error>) -> Void) {
+        func stop(completion: @escaping (Result<SongsDescriptor, Error>) -> Void) {
             client.makeRequest(endpoint: "/songs/stop", completion: completion)
+        }
+        
+        func volume(value: Int, completion: @escaping (Result<SongsDescriptor, Error>) -> Void) {
+            client.makeRequest(endpoint: "/songs/volume", queryParams: ["value": String(value)], completion: completion)
         }
     }
     

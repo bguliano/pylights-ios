@@ -12,36 +12,45 @@ struct ContentView: View {
     @StateObject var pylightsViewModel = PylightsViewModel()
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            SongsView(pylightsViewModel: pylightsViewModel)
-                .tabItem {
-                    Label("Songs", systemImage: "music.note")
-                }
-                .tag(ContentViewTab.songs)
+        ZStack {
+            TabView(selection: $selectedTab) {
+                SongsView(pylightsViewModel: pylightsViewModel)
+                    .tabItem {
+                        Label("Songs", systemImage: "music.note")
+                    }
+                    .tag(ContentViewTab.songs)
+                
+                LightsView(pylightsViewModel: pylightsViewModel)
+                    .tabItem {
+                        Label("Lights", systemImage: "lightbulb")
+                    }
+                    .tag(ContentViewTab.lights)
+                
+                PresetsView(pylightsViewModel: pylightsViewModel)
+                    .tabItem {
+                        Label("Presets", systemImage: "rectangle.stack")
+                    }
+                    .tag(ContentViewTab.presets)
+            }
             
-            LightsView(pylightsViewModel: pylightsViewModel)
-                .tabItem {
-                    Label("Lights", systemImage: "lightbulb")
-                }
-                .tag(ContentViewTab.lights)
-            
-            PresetsView(pylightsViewModel: pylightsViewModel)
-                .tabItem {
-                    Label("Presets", systemImage: "rectangle.stack")
-                }
-                .tag(ContentViewTab.presets)
-        }
-        .overlay(
             VStack {
                 Spacer()
                 CurrentlyPlayingView(pylightsViewModel: pylightsViewModel)
                     .padding(.horizontal)
                     .padding(.bottom, 65)
             }
-                .offset(y: selectedTab == .songs ? 0 : 400)
-                .scaleEffect(selectedTab == .songs ? 1 : 0.8)
-                .animation(.spring, value: selectedTab)
-        )
+            .offset(y: selectedTab == .songs ? 0 : 400)
+            .scaleEffect(selectedTab == .songs ? 1 : 0.8)
+            .animation(.spring, value: selectedTab)
+            
+            Rectangle()
+                .fill(Color(uiColor: .systemBackground).opacity(0.6))
+                .ignoresSafeArea()
+                .overlay(
+                    ProgressView()
+                        .scaleEffect(3.0)
+                )
+        }
     }
 }
 

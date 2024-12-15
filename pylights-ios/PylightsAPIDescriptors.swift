@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PylightsAPIDescriptor: Codable {}
+protocol PylightsAPIDescriptor: Codable, Equatable {}
 
 struct SongDescriptor: PylightsAPIDescriptor {
     let title: String
@@ -19,8 +19,9 @@ struct SongDescriptor: PylightsAPIDescriptor {
 struct SongsDescriptor: PylightsAPIDescriptor {
     let songs: [SongDescriptor]
     let playing: SongDescriptor?
+    let paused: Bool
     let currentTimeMs: Double
-    let volume: Double
+    let volume: Int
 }
 
 struct LightDescriptor: PylightsAPIDescriptor {
