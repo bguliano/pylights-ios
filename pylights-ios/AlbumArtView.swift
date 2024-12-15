@@ -8,17 +8,21 @@
 import SwiftUI
 
 struct AlbumArtView: View {
-    let albumArtName: String?
+    let albumArtBase64: String
     
     var body: some View {
         VStack {
-            if let albumArtName {
-                Image(albumArtName)
+            if let uiImage = decodeBase64ToUIImage(albumArtBase64) {
+                Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFit()
             } else {
                 RoundedRectangle(cornerRadius: 15)
-                    .strokeBorder(Color.primary, lineWidth: 1)
+                    .fill(Color(UIColor.systemBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .strokeBorder(Color.primary, lineWidth: 1) // Keep the border
+                    )
                     .overlay {
                         GeometryReader { geometry in
                             Image(systemName: "music.note")
@@ -33,8 +37,15 @@ struct AlbumArtView: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
+    
+    func decodeBase64ToUIImage(_ base64String: String) -> UIImage? {
+        guard let imageData = Data(base64Encoded: base64String) else {
+            return nil
+        }
+        return UIImage(data: imageData)
+    }
 }
 
 #Preview {
-    AlbumArtView(albumArtName: nil)
+    AlbumArtView(albumArtBase64: "")
 }

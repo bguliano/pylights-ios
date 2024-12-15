@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "AECA0B32-4CD3-414D-BD42-70A7AD1BBB9B"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "53B4BB0B-AC45-4364-A969-0E79942DB846"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../../var/folders/tt/lrdqblz11t10slv3nrppqprh0000gn/T/swift-generated-sources/@__swiftmacro_12pylights_ios0020SongsViewswift_odAJdfMX30_0_33_1581CD909A42D292A814510880FB87B0Ll7PreviewfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s12pylights_ios0020SongsViewswift_odAJdfMX30_0_33_1581CD909A42D292A814510880FB87B0Ll7PreviewfMf_15PreviewRegistryfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

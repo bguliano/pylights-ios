@@ -8,16 +8,14 @@
 import SwiftUI
 
 struct CurrentlyPlayingView: View {
-    let songName: String?
-    let albumArtName: String?
-    @Binding var volume: Double
+    @ObservedObject var pylightsViewModel: PylightsViewModel
     
     var body: some View {
         VStack {
             HStack(spacing: 20) {
-                AlbumArtView(albumArtName: albumArtName)
+                AlbumArtView(albumArtBase64: pylightsViewModel.currentSong?.albumArt ?? "")
                 
-                Text(songName ?? "Not playing")
+                Text(pylightsViewModel.currentSong?.title ?? "Not playing")
                     .bold()
                 
                 Spacer()
@@ -38,19 +36,17 @@ struct CurrentlyPlayingView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
-            Slider(value: $volume, in: 0...100)
+            Slider(value: $pylightsViewModel.volume, in: 0...100)
         }
         .frame(height: 100)
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(.thinMaterial) // Replace with `.regularMaterial` or `.ultraThinMaterial` for different effects
+                .fill(.thinMaterial)
         )
     }
 }
 
 #Preview {
-    @Previewable @State var volume = 50.0
-
-    CurrentlyPlayingView(songName: "Wizards in Winter", albumArtName: "wiw", volume: $volume)
+    CurrentlyPlayingView(pylightsViewModel: PylightsViewModel())
 }

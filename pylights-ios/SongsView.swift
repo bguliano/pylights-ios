@@ -8,24 +8,41 @@
 import SwiftUI
 
 struct SongsView: View {
+    @ObservedObject var pylightsViewModel: PylightsViewModel
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                HStack {
-                    SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: nil)
-                    SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: "wiw")
+        NavigationStack {
+            ZStack {
+                Color(UIColor.systemGroupedBackground) // Mimic standard light gray background
+                    .ignoresSafeArea() // Extend the background to fill the entire screen
+
+                ScrollView {
+                    LazyVGrid(columns: [
+                        GridItem(.flexible(), alignment: .top), // Align grid items to the top
+                        GridItem(.flexible(), alignment: .top)
+                    ], spacing: 20) {
+                        ForEach(pylightsViewModel.songs, id: \.title) { song in
+                            VStack {
+                                SongButton(
+                                    songName: song.title,
+                                    artistName: song.artist,
+                                    albumArtBase64: song.albumArt
+                                ) {
+                                    pylightsViewModel.playSong(song.title)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .top) // Ensure each cell is aligned to the top
+                        }
+                    }
+                    .padding()
+                    .padding(.bottom, 150)
                 }
-                .padding(.horizontal)
-                HStack {
-                    SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: "wiw")
-                    SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: nil)
-                }
-                .padding(.horizontal)
             }
+            .navigationTitle("Songs")
         }
     }
 }
 
 #Preview {
-    SongsView()
+    SongsView(pylightsViewModel: PylightsViewModel())
 }

@@ -10,11 +10,12 @@ import SwiftUI
 struct SongButton: View {
     let songName: String
     let artistName: String
-    let albumArtName: String?
+    let albumArtBase64: String
+    let action: () -> Void
     
     var body: some View {
         VStack {
-            AlbumArtView(albumArtName: albumArtName)
+            AlbumArtView(albumArtBase64: albumArtBase64)
             
             Text(songName)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -22,19 +23,20 @@ struct SongButton: View {
                 .font(.caption)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .onTapGesture(perform: action)
     }
 }
 
 #Preview {
     VStack(spacing: 20) {
         HStack {
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: nil)
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: "wiw")
+            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
+            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
         }
         .padding(.horizontal)
         HStack {
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: "wiw")
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtName: "wiw")
+            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
+            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
         }
         .padding(.horizontal)
     }

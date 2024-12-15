@@ -8,11 +8,35 @@
 import SwiftUI
 
 struct PresetsView: View {
+    @ObservedObject var pylightsViewModel: PylightsViewModel
+
     var body: some View {
-        Text("Presets")
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(pylightsViewModel.presets, id: \.name) { preset in
+                        Button(preset.name) {
+                            pylightsViewModel.activatePreset(preset.name)
+                        }
+                        .foregroundStyle(.primary)
+                    }
+                } footer: {
+                    Text("Click a preset above to apply it")
+                }
+                
+                Section {
+                    Button("Add Preset") {
+                        
+                    }
+                } footer: {
+                    Text("Or add a new one")
+                }
+            }
+            .navigationTitle("Presets")
+        }
     }
 }
 
 #Preview {
-    PresetsView()
+    PresetsView(pylightsViewModel: PylightsViewModel())
 }
