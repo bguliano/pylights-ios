@@ -47,7 +47,12 @@ struct ConnectionView: View {
             } else {
                 Form {
                     VStack {
-                        
+                        if let appIconName = AppIconProvider.appIconName(), let uiImage = UIImage(named: appIconName) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .frame(width: 200, height: 200)
+                                .clipShape(RoundedRectangle(cornerRadius: 60))
+                        }
                         Text("Welcome to Pylights!")
                             .font(.title)
                             .frame(maxWidth: .infinity)
