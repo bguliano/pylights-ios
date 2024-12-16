@@ -13,7 +13,7 @@ enum PylightsAPIError: Error {
 }
 
 class PylightsAPIClient: ObservableObject {
-    private let baseURL: URL
+    private var baseURL: URL?
     private let baseEndpoint = "/pylights-api"
     
     lazy var songs = SongsModule(client: self)
@@ -24,14 +24,32 @@ class PylightsAPIClient: ObservableObject {
     
     @Published var isLoading: Bool = false
     
-    init(baseURL: String) throws {
+    func connect(baseURL: String, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let url = URL(string: baseURL) else {
-            throw PylightsAPIError.invalidURL
+            completion(.failure(PylightsAPIError.invalidURL))
+            return
         }
+        
+        // Set the baseURL temporarily for validation
         self.baseURL = url
+        
+        // Use the `info` method to validate the connection
+        self.info { result in
+            switch result {
+            case .success:
+                print("Successfully connected to \(baseURL)")
+                completion(.success(())) // Connection successful
+            case .failure(let error):
+                print("Connection validation failed: \(error.localizedDescription)")
+                self.baseURL = nil // Reset baseURL as the connection is invalid
+                completion(.failure(error)) // Pass the error back to the caller
+            }
+        }
     }
     
     func makeRequest<T: Codable>(endpoint: String, queryParams: [String: String]? = nil, completion: @escaping (Result<T, Error>) -> Void) {
+        guard let baseURL else { fatalError("PylightsAPIClient must be connected before making requests") }
+        
         isLoading = true
         
         var urlComponents = URLComponents(url: baseURL.appendingPathComponent(baseEndpoint + endpoint), resolvingAgainstBaseURL: false)!
@@ -76,7 +94,7 @@ class PylightsAPIClient: ObservableObject {
             
             do {
                 let decoder = JSONDecoder()
-                // print(String(data: data, encoding: .utf8))
+//                print(String(data: data, encoding: .utf8))
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
                 let result = try decoder.decode(T.self, from: data)
                 completion(.success(result))

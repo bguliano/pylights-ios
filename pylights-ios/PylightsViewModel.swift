@@ -27,11 +27,31 @@ class PylightsViewModel: ObservableObject {
     
     private var msTimer: Timer?
     
-    private let api = try! PylightsAPIClient(baseURL: "http://127.0.0.1:5000")
+    private let api = PylightsAPIClient()
     
     init() {
         setupBindings()
-        reloadInfo()
+    }
+    
+    func connect(ipAddress: String, port: Int) async -> Bool {
+        let baseURL = "http://\(ipAddress):\(port)"
+        do {
+            return try await withCheckedThrowingContinuation { continuation in
+                api.connect(baseURL: baseURL) { result in
+                    switch result {
+                    case .success:
+                        print("Connected successfully to \(baseURL)")
+                        continuation.resume(returning: true) // Connection successful
+                    case .failure(let error):
+                        print("Failed to connect to \(baseURL): \(error.localizedDescription)")
+                        continuation.resume(returning: false) // Connection failed
+                    }
+                }
+            }
+        } catch {
+            print("Unexpected error during connection: \(error.localizedDescription)")
+            return false // Treat any unexpected error as a failed connection
+        }
     }
     
     private func setupBindings() {
@@ -105,7 +125,6 @@ class PylightsViewModel: ObservableObject {
     // publically exposed api endpoints
     
     func reloadInfo() {
-        print("reloadInfo")
         api.info(completion: updateFromDescriptors)
     }
     

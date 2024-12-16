@@ -11,7 +11,7 @@ import SwiftUI
 struct pylights_iosApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ConnectionView()
         }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var pylightsViewModel = PylightsViewModel()
+    @ObservedObject var pylightsViewModel: PylightsViewModel
     @State private var selectedTab: ContentViewTab = .songs
     
     var body: some View {
@@ -46,18 +46,7 @@ struct ContentView: View {
             .scaleEffect(selectedTab == .songs ? 1 : 0.8)
             .animation(.spring, value: selectedTab)
             
-            VStack {
-                if pylightsViewModel.isLoading {
-                    Rectangle()
-                        .fill(Color(uiColor: .systemBackground).opacity(0.6))
-                        .ignoresSafeArea()
-                        .overlay(
-                            ProgressView()
-                                .controlSize(.large)
-                        )
-                }
-            }
-            .animation(.easeInOut(duration: 0.2), value: pylightsViewModel.isLoading)
+            LoadingView(condition: pylightsViewModel.isLoading)
         }
     }
 }
@@ -77,10 +66,10 @@ enum ContentViewTab {
 }
 
 #Preview {
-    ContentView()
+    ContentView(pylightsViewModel: PylightsViewModel())
 }
 
 #Preview {
-    ContentView()
+    ContentView(pylightsViewModel: PylightsViewModel())
         .preferredColorScheme(.dark)
 }
