@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedTab: ContentViewTab = .songs
     @StateObject var pylightsViewModel = PylightsViewModel()
+    @State private var selectedTab: ContentViewTab = .songs
     
     var body: some View {
         ZStack {
@@ -19,18 +19,21 @@ struct ContentView: View {
                         Label("Songs", systemImage: "music.note")
                     }
                     .tag(ContentViewTab.songs)
+                    .onAppear(perform: pylightsViewModel.reloadInfo)
                 
                 LightsView(pylightsViewModel: pylightsViewModel)
                     .tabItem {
                         Label("Lights", systemImage: "lightbulb")
                     }
                     .tag(ContentViewTab.lights)
+                    .onAppear(perform: pylightsViewModel.reloadInfo)
                 
                 PresetsView(pylightsViewModel: pylightsViewModel)
                     .tabItem {
                         Label("Presets", systemImage: "rectangle.stack")
                     }
                     .tag(ContentViewTab.presets)
+                    .onAppear(perform: pylightsViewModel.reloadInfo)
             }
             
             VStack {
@@ -43,13 +46,18 @@ struct ContentView: View {
             .scaleEffect(selectedTab == .songs ? 1 : 0.8)
             .animation(.spring, value: selectedTab)
             
-            Rectangle()
-                .fill(Color(uiColor: .systemBackground).opacity(0.6))
-                .ignoresSafeArea()
-                .overlay(
-                    ProgressView()
-                        .scaleEffect(3.0)
-                )
+            VStack {
+                if pylightsViewModel.isLoading {
+                    Rectangle()
+                        .fill(Color(uiColor: .systemBackground).opacity(0.6))
+                        .ignoresSafeArea()
+                        .overlay(
+                            ProgressView()
+                                .controlSize(.large)
+                        )
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: pylightsViewModel.isLoading)
         }
     }
 }

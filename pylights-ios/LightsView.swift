@@ -55,12 +55,12 @@ struct LightsView: View {
             .navigationTitle("Lights")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink(destination: RemapView()) {
+                    NavigationLink(destination: RemapView(pylightsViewModel: pylightsViewModel)) {
                         Image(systemName: "rectangle.connected.to.line.below")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination: DeveloperView()) {
+                    NavigationLink(destination: DeveloperView(pylightsViewModel: pylightsViewModel)) {
                         Image(systemName: "wrench")
                     }
                 }

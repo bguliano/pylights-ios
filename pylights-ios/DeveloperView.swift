@@ -8,11 +8,76 @@
 import SwiftUI
 
 struct DeveloperView: View {
+    @ObservedObject var pylightsViewModel: PylightsViewModel
+    
     var body: some View {
-        Text("Developer")
+        VStack {
+            List {
+                Section {
+                    ButtonRow(title: "Recompile shows") {
+                        pylightsViewModel.recompileShows()
+                    }
+                } header: {
+                    Text("Actions")
+                }
+                
+                Section {
+                    InfoRow(title: "Version", value: pylightsViewModel.developer?.version)
+                    InfoRow(title: "IP Address", value: pylightsViewModel.developer?.ipAddress)
+                    InfoRow(title: "CPU Usage", value: pylightsViewModel.developer?.cpuUsage)
+                    InfoRow(title: "LED Server IP Address", value: pylightsViewModel.developer?.ledServerIpAddress)
+                    InfoRow(title: "LED Server Status", value: pylightsViewModel.developer?.ledServerStatus)
+                } header: {
+                    Text("Information")
+                }
+            }
+        }
+        .navigationTitle("Developer")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
+        .onAppear(perform: pylightsViewModel.developerInfo)
+        .onDisappear {
+            pylightsViewModel.developer = nil
+        }
+    }
+}
+
+fileprivate struct ButtonRow: View {
+    let title: String
+    let action: () -> Void
+    @State private var showConfirmation: Bool = false
+    
+    var body: some View {
+        Button(title) {
+            showConfirmation = true
+        }
+        .confirmationDialog("Are you sure you want to \(title.lowercased())?", isPresented: $showConfirmation, titleVisibility: .visible) {
+            Button("Yes") { action() }
+            Button("No", role: .cancel) {}
+        }
+    }
+}
+
+fileprivate struct InfoRow: View {
+    let title: String
+    let value: Any?
+    
+    var body: some View {
+        if let value {
+            HStack {
+                Text(title)
+                Spacer()
+                Text("\(value)")
+                    .foregroundStyle(.gray)
+            }
+        } else {
+            ProgressView()
+        }
     }
 }
 
 #Preview {
-    DeveloperView()
+    NavigationStack {
+        DeveloperView(pylightsViewModel: PylightsViewModel())
+    }
 }

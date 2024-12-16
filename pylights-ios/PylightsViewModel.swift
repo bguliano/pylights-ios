@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 class PylightsViewModel: ObservableObject {
     @Published var volume: Int = 50
@@ -20,25 +19,26 @@ class PylightsViewModel: ObservableObject {
     @Published var currentMs: Double = 0
     @Published var totalMS: Double = 0
     
+    @Published var remapRemaining: [String]?
+    
+    @Published var developer: DeveloperDescriptor?
+    
     @Published var isLoading: Bool = false
     
     private var msTimer: Timer?
-    private var cancellables: Set<AnyCancellable> = []
     
     private let api = try! PylightsAPIClient(baseURL: "http://127.0.0.1:5000")
     
     init() {
         setupBindings()
-        api.info(completion: updateDescriptors)
+        reloadInfo()
     }
     
     private func setupBindings() {
         api.$isLoading
+            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
             .receive(on: RunLoop.main)
-            .sink { [weak self] newValue in
-                self?.isLoading = newValue
-            }
-            .store(in: &cancellables)
+            .assign(to: &$isLoading)
     }
     
     private func startMsTimer() {
@@ -54,7 +54,7 @@ class PylightsViewModel: ObservableObject {
         msTimer = nil
     }
     
-    private func updateDescriptors<T: PylightsAPIDescriptor>(_ completion: Result<T, Error>) {
+    private func updateFromDescriptors<T: PylightsAPIDescriptor>(_ completion: Result<T, Error>) {
         switch completion {
         case .success(let descriptor):
             func updateSongs(_ songsDescriptor: SongsDescriptor) {
@@ -79,7 +79,7 @@ class PylightsViewModel: ObservableObject {
                 presets = presetsDescriptor.presets
             }
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [self] in
                 if let infoDescriptor = descriptor as? InfoDescriptor {
                     updateSongs(infoDescriptor.songs)
                     updateLights(infoDescriptor.lights)
@@ -90,6 +90,10 @@ class PylightsViewModel: ObservableObject {
                     updateLights(lightsDescriptor)
                 } else if let presetsDescriptor = descriptor as? PresetsDescriptor {
                     updatePresets(presetsDescriptor)
+                } else if let remapDescriptor = descriptor as? RemapDescriptor {
+                    remapRemaining = remapDescriptor.remaining
+                } else if let developerDescriptor = descriptor as? DeveloperDescriptor {
+                    developer = developerDescriptor
                 }
             }
             
@@ -100,39 +104,64 @@ class PylightsViewModel: ObservableObject {
     
     // publically exposed api endpoints
     
+    func reloadInfo() {
+        print("reloadInfo")
+        api.info(completion: updateFromDescriptors)
+    }
+    
     func playSong(_ name: String) {
-        api.songs.play(name: name, completion: updateDescriptors)
+        api.songs.play(name: name, completion: updateFromDescriptors)
     }
     
     func pauseSong() {
-        api.songs.pause(completion: updateDescriptors)
+        api.songs.pause(completion: updateFromDescriptors)
     }
     
     func resumeSong() {
-        api.songs.resume(completion: updateDescriptors)
+        api.songs.resume(completion: updateFromDescriptors)
     }
     
     func stopSong() {
-        api.songs.stop(completion: updateDescriptors)
+        api.songs.stop(completion: updateFromDescriptors)
     }
     
     func setVolume() {
-        api.songs.volume(value: volume, completion: updateDescriptors)
+        api.songs.volume(value: volume, completion: updateFromDescriptors)
     }
     
     func toggleLight(_ name: String) {
-        api.lights.toggle(name: name, completion: updateDescriptors)
+        api.lights.toggle(name: name, completion: updateFromDescriptors)
     }
     
     func allOn() {
-        api.lights.allOn(completion: updateDescriptors)
+        api.lights.allOn(completion: updateFromDescriptors)
     }
     
     func allOff() {
-        api.lights.allOff(completion: updateDescriptors)
+        api.lights.allOff(completion: updateFromDescriptors)
     }
     
     func activatePreset(_ name: String) {
-        api.presets.activate(name: name, completion: updateDescriptors)
+        api.presets.activate(name: name, completion: updateFromDescriptors)
+    }
+    
+    func startRemap() {
+        api.remap.start(completion: updateFromDescriptors)
+    }
+    
+    func nextRemap(name: String) {
+        api.remap.next(name: name, completion: updateFromDescriptors)
+    }
+    
+    func cancelRemap() {
+        api.remap.cancel(completion: updateFromDescriptors)
+    }
+    
+    func recompileShows() {
+        api.developer.recompileShows(completion: updateFromDescriptors)
+    }
+    
+    func developerInfo() {
+        api.developer.info(completion: updateFromDescriptors)
     }
 }

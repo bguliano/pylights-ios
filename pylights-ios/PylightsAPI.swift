@@ -33,7 +33,6 @@ class PylightsAPIClient: ObservableObject {
     
     func makeRequest<T: Codable>(endpoint: String, queryParams: [String: String]? = nil, completion: @escaping (Result<T, Error>) -> Void) {
         isLoading = true
-        defer { isLoading = false }
         
         var urlComponents = URLComponents(url: baseURL.appendingPathComponent(baseEndpoint + endpoint), resolvingAgainstBaseURL: false)!
         if let queryParams {
@@ -43,6 +42,8 @@ class PylightsAPIClient: ObservableObject {
         let request = URLRequest(url: urlComponents.url!)
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            defer { self.isLoading = false }
+            
             if let error {
                 completion(.failure(error))
                 return
