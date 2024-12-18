@@ -23,11 +23,7 @@ struct SongsView: View {
                     ], spacing: 20) {
                         ForEach(pylightsViewModel.songs, id: \.title) { song in
                             VStack {
-                                SongButton(
-                                    songName: song.title,
-                                    artistName: song.artist,
-                                    albumArtBase64: song.albumArt
-                                ) {
+                                SongButton(songDescriptor: song) {
                                     pylightsViewModel.playSong(song.title)
                                 }
                             }

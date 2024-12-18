@@ -60,21 +60,10 @@ struct RemapView: View {
     }
 }
 
-fileprivate struct CustomBackButton: View {
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: "chevron.left")
-                Text("Cancel")
-            }
-        }
-    }
-}
-
 #Preview {
-    NavigationStack {
-        RemapView(pylightsViewModel: PylightsViewModel())
+    let vm = PylightsViewModel()
+    vm.setupPreview()
+    return NavigationStack {
+        RemapView(pylightsViewModel: vm)
     }
 }

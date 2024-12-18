@@ -8,35 +8,59 @@
 import SwiftUI
 
 struct SongButton: View {
-    let songName: String
-    let artistName: String
-    let albumArtBase64: String
+    let songDescriptor: SongDescriptor
     let action: () -> Void
+    
+    @State private var isPressed = false // State variable for the pulse effect
     
     var body: some View {
         VStack {
-            AlbumArtView(albumArtBase64: albumArtBase64)
+            AlbumArtView(albumArtBase64: songDescriptor.albumArt)
+                .overlay(
+                    Text(songDescriptor.lengthMs.toMinutesAndSecondsString())
+                        .font(.caption)
+                        .padding(5)
+                        .background(Color(uiColor: .systemBackground).opacity(0.7))
+                        .clipShape(Capsule())
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                        .padding(5)
+                )
             
-            Text(songName)
+            Text(songDescriptor.title)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text(artistName)
+            
+            Text(songDescriptor.artist)
                 .font(.caption)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .onTapGesture(perform: action)
+        .opacity(isPressed ? 0.8 : 1.0) // Apply the opacity pulse
+        .onTapGesture(perform: onClick)
+    }
+    
+    private func onClick() {
+        let pulseDuration = 0.3
+        withAnimation(.easeInOut(duration: pulseDuration / 2)) {
+            isPressed = true // Start the pulse effect
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + pulseDuration / 2) {
+            withAnimation(.easeInOut(duration: pulseDuration / 2)) {
+                isPressed = false // Reset the pulse effect
+            }
+        }
+        action() // Perform the button's action
     }
 }
 
 #Preview {
     VStack(spacing: 20) {
         HStack {
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
+            SongButton(songDescriptor: .init(title: "Wizards in Winter", artist: "The Orchestra", albumArt: "", lengthMs: 154_000)) {}
+            SongButton(songDescriptor: .init(title: "Wizards in Winter", artist: "The Orchestra", albumArt: "", lengthMs: 154_000)) {}
         }
         .padding(.horizontal)
         HStack {
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
-            SongButton(songName: "Wizards in Winter", artistName: "The Orhcestra", albumArtBase64: "") {}
+            SongButton(songDescriptor: .init(title: "Wizards in Winter", artist: "The Orchestra", albumArt: "", lengthMs: 154_000)) {}
+            SongButton(songDescriptor: .init(title: "Wizards in Winter", artist: "The Orchestra", albumArt: "", lengthMs: 154_000)) {}
         }
         .padding(.horizontal)
     }

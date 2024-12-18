@@ -20,13 +20,14 @@ fileprivate enum ConnectionStage {
     case connected
 }
 
-fileprivate struct AlertMessage: Identifiable {
-    let id = UUID()
-    let message: String
+fileprivate enum AlertType: String {
+    case invalidPort = "Invalid port"
+    case invalidHostname = "Invalid hostname"
+    case connectionFailed = "Could not connect"
 }
 
 struct ConnectionView: View {
-    @StateObject var pylightsViewModel = PylightsViewModel()
+    @StateObject var pylightsViewModel = PylightsViewModel(debugMode: false)
     
     @State private var connectionType: ConnectionType = .hostname
     @State private var hostname: String = "pylights.local"
@@ -34,7 +35,7 @@ struct ConnectionView: View {
     @State private var port: String = "5001"
     
     @State private var connectionStage: ConnectionStage = .disconnected
-    @State private var alertMessage: AlertMessage? = nil
+    @State private var selectedAlert: AlertType?
     
     private var connectionInputBinding: Binding<String> {
         connectionType == .hostname ? $hostname : $ipAddress
@@ -81,8 +82,11 @@ struct ConnectionView: View {
                 .loadingOverlay(isLoading: connectionStage == .connecting)
             }
         }
-        .alert(item: $alertMessage) { alertMessage in
-            Alert(title: Text(alertMessage.message))
+        .alert(selectedAlert?.rawValue ?? "", isPresented: Binding<Bool>(
+            get: { selectedAlert != nil },
+            set: { if !$0 { selectedAlert = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
         }
     }
     
@@ -102,7 +106,7 @@ struct ConnectionView: View {
                     self.ipAddress = ipAddress
                     self.validatePortAndConnect()
                 } else {
-                    showAlert(message: "Invalid hostname")
+                    selectedAlert = .invalidHostname
                     connectionStage = .disconnected
                 }
             }
@@ -111,7 +115,7 @@ struct ConnectionView: View {
     
     func validatePortAndConnect() {
         guard Int(port) != nil else {
-            showAlert(message: "Invalid port")
+            selectedAlert = .invalidPort
             connectionStage = .disconnected
             return
         }
@@ -125,15 +129,11 @@ struct ConnectionView: View {
                 if success {
                     connectionStage = .connected
                 } else {
-                    showAlert(message: "Could not connect")
+                    selectedAlert = .connectionFailed
                     connectionStage = .disconnected
                 }
             }
         }
-    }
-    
-    func showAlert(message: String) {
-        alertMessage = AlertMessage(message: message)
     }
 }
 

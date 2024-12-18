@@ -29,8 +29,9 @@ class PylightsViewModel: ObservableObject {
     
     private let api = PylightsAPIClient()
     
-    init() {
+    init(debugMode: Bool = true) {
         setupBindings()
+        if debugMode { setupPreview() }
     }
     
     func connect(ipAddress: String, port: Int) async -> Bool {
@@ -173,6 +174,10 @@ class PylightsViewModel: ObservableObject {
     
     func activatePreset(_ name: String) {
         api.presets.activate(name: name, completion: updateFromDescriptors)
+    }
+    
+    func addPreset(_ name: String, _ lights: [String]) {
+        api.presets.add(name: name, lights: lights, completion: updateFromDescriptors)
     }
     
     func startRemap() {
