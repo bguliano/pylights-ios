@@ -54,6 +54,13 @@ class PylightsViewModel: ObservableObject {
         }
     }
     
+    func setupPreview() {
+        Task {
+            await _ = connect(ipAddress: "127.0.0.1", port: 5001)
+            reloadInfo()
+        }
+    }
+    
     private func setupBindings() {
         api.$isLoading
             .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
@@ -64,6 +71,10 @@ class PylightsViewModel: ObservableObject {
     private func startMsTimer() {
         stopMsTimer()
         msTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            if let currentMs = self?.currentMs, let totalMS = self?.totalMS {
+                if currentMs >= totalMS { self?.stopMsTimer() }
+                self?.reloadInfo()
+            }
             if self?.isPaused == false { self?.currentMs += 1000 }
         }
         RunLoop.current.add(msTimer!, forMode: .common)
