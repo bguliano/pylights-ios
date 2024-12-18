@@ -69,7 +69,7 @@ struct ConnectionView: View {
                         TextField(connectionType.rawValue, text: connectionInputBinding)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                            .keyboardType(connectionType == .hostname ? .default : .decimalPad)
+                            .keyboardType(connectionType == .hostname ? .asciiCapable : .decimalPad)
                         TextField("Port", text: $port)
                             .keyboardType(.numberPad)
                     }

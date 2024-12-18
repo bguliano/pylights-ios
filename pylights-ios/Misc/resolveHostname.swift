@@ -8,11 +8,11 @@
 import Foundation
 
 func resolveHostname(_ hostname: String, completion: @escaping (String?) -> Void) {
-    DispatchQueue.global(qos: .utility).async {
+    DispatchQueue.global(qos: .default).async {
         var hints = addrinfo(
-            ai_flags: AI_PASSIVE,
-            ai_family: AF_UNSPEC,       // Allow both IPv4 and IPv6
-            ai_socktype: SOCK_STREAM,   // TCP stream sockets
+            ai_flags: AI_CANONNAME,  // Canonical name lookup
+            ai_family: AF_INET,      // Only IPv4
+            ai_socktype: SOCK_STREAM,
             ai_protocol: 0,
             ai_addrlen: 0,
             ai_canonname: nil,
@@ -20,38 +20,35 @@ func resolveHostname(_ hostname: String, completion: @escaping (String?) -> Void
             ai_next: nil
         )
         
-        var infoPointer: UnsafeMutablePointer<addrinfo>?
-
-        let status = getaddrinfo(hostname, nil, &hints, &infoPointer)
-        guard status == 0, let info = infoPointer else {
-            if let errorString = gai_strerror(status) {
-                print("Error: \(String(cString: errorString))")
-            } else {
-                print("Unknown error occurred.")
-            }
-            DispatchQueue.main.async {
-                completion(nil)
-            }
+        var result: UnsafeMutablePointer<addrinfo>?
+        
+        let status = getaddrinfo(hostname, nil, &hints, &result)
+        guard status == 0 else {
+            print("Error in getaddrinfo: \(String(cString: gai_strerror(status)))")
+            completion(nil)
             return
         }
         
-        defer { freeaddrinfo(info) }
+        defer { freeaddrinfo(result) }
         
-        if let addr = info.pointee.ai_addr {
-            var hostnameBuffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-            if getnameinfo(addr, socklen_t(info.pointee.ai_addrlen), &hostnameBuffer, socklen_t(hostnameBuffer.count), nil, 0, NI_NUMERICHOST) == 0 {
-                let ipAddress = String(cString: hostnameBuffer)
-                DispatchQueue.main.async {
-                    completion(ipAddress)
+        var resolvedIP: String?
+        
+        var currentResult = result
+        while currentResult != nil {
+            if let addr = currentResult?.pointee.ai_addr {
+                let family = addr.pointee.sa_family
+                if family == sa_family_t(AF_INET) { // IPv4
+                    addr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { addr4Pointer in
+                        var ipBuffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                        inet_ntop(AF_INET, &addr4Pointer.pointee.sin_addr, &ipBuffer, socklen_t(INET_ADDRSTRLEN))
+                        resolvedIP = String(cString: ipBuffer)
+                    }
+                    break
                 }
-                return
-            } else {
-                print("Failed to convert address to string.")
             }
+            currentResult = currentResult?.pointee.ai_next
         }
         
-        DispatchQueue.main.async {
-            completion(nil)
-        }
+        completion(resolvedIP)
     }
 }
