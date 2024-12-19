@@ -73,8 +73,10 @@ class PylightsViewModel: ObservableObject {
         stopMsTimer()
         msTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             if let currentMs = self?.currentMs, let totalMS = self?.totalMS {
-                if currentMs >= totalMS { self?.stopMsTimer() }
-                self?.reloadInfo()
+                if currentMs >= totalMS {
+                    self?.stopMsTimer()
+                    self?.reloadInfo()
+                }
             }
             if self?.isPaused == false { self?.currentMs += 1000 }
         }
