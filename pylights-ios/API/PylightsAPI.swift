@@ -209,10 +209,6 @@ class PylightsAPIClient: ObservableObject {
             self.client = client
         }
         
-        func recompileShows(completion: @escaping (Result<DeveloperDescriptor, Error>) -> Void) {
-            client.makeRequest(endpoint: "/developer/recompile-shows", completion: completion)
-        }
-        
         func info(completion: @escaping (Result<DeveloperDescriptor, Error>) -> Void) {
             client.makeRequest(endpoint: "/developer/info", completion: completion)
         }

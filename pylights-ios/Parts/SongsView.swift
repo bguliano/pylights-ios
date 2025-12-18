@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SongsView: View {
     @ObservedObject var pylightsViewModel: PylightsViewModel
+    @Binding var isShowingVolume: Bool
 
     var body: some View {
         NavigationStack {
@@ -31,7 +32,7 @@ struct SongsView: View {
                         }
                     }
                     .padding()
-                    .padding(.bottom, 150)
+                    .padding(.bottom, isShowingVolume ? 150 : 100)
                 }
             }
             .navigationTitle("Songs")
@@ -40,5 +41,7 @@ struct SongsView: View {
 }
 
 #Preview {
-    SongsView(pylightsViewModel: PylightsViewModel())
+    @Previewable @State var isShowingVolume: Bool = false
+    
+    SongsView(pylightsViewModel: PylightsViewModel(), isShowingVolume: $isShowingVolume)
 }

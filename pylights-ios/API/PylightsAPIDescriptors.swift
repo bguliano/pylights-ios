@@ -51,8 +51,7 @@ struct DeveloperDescriptor: PylightsAPIDescriptor {
     let version: String
     let ipAddress: String
     let cpuUsage: Double
-    let ledServerIpAddress: String
-    let ledServerStatus: Bool
+    let serialPort: String
 }
 
 struct InfoDescriptor: PylightsAPIDescriptor {

@@ -194,10 +194,6 @@ class PylightsViewModel: ObservableObject {
         api.remap.cancel(completion: updateFromDescriptors)
     }
     
-    func recompileShows() {
-        api.developer.recompileShows(completion: updateFromDescriptors)
-    }
-    
     func developerInfo() {
         api.developer.info(completion: updateFromDescriptors)
     }

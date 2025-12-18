@@ -10,11 +10,12 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var pylightsViewModel: PylightsViewModel
     @State private var selectedTab: ContentViewTab = .songs
+    @State private var isShowingVolume: Bool = false
     
     var body: some View {
         ZStack {
             TabView(selection: $selectedTab) {
-                SongsView(pylightsViewModel: pylightsViewModel)
+                SongsView(pylightsViewModel: pylightsViewModel, isShowingVolume: $isShowingVolume)
                     .tabItem {
                         Label("Songs", systemImage: "music.note")
                     }
@@ -38,7 +39,7 @@ struct ContentView: View {
             
             VStack {
                 Spacer()
-                CurrentlyPlayingView(pylightsViewModel: pylightsViewModel)
+                CurrentlyPlayingView(pylightsViewModel: pylightsViewModel, isShowingVolume: $isShowingVolume)
                     .padding(.horizontal)
                     .padding(.bottom, 65)
             }

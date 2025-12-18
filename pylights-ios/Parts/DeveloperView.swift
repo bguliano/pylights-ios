@@ -13,20 +13,17 @@ struct DeveloperView: View {
     var body: some View {
         VStack {
             List {
-                Section {
-                    ButtonRow(title: "Recompile shows") {
-                        pylightsViewModel.recompileShows()
-                    }
-                } header: {
-                    Text("Actions")
-                }
+//                Section {
+//
+//                } header: {
+//                    Text("Actions")
+//                }
                 
                 Section {
                     InfoRow(title: "Version", value: pylightsViewModel.developer?.version)
                     InfoRow(title: "IP Address", value: pylightsViewModel.developer?.ipAddress)
                     InfoRow(title: "CPU Usage", value: pylightsViewModel.developer?.cpuUsage)
-                    InfoRow(title: "LED Server IP Address", value: pylightsViewModel.developer?.ledServerIpAddress)
-                    InfoRow(title: "LED Server Status", value: pylightsViewModel.developer?.ledServerStatus)
+                    InfoRow(title: "Serial Port", value: pylightsViewModel.developer?.serialPort)
                 } header: {
                     Text("Information")
                 }
@@ -67,7 +64,7 @@ fileprivate struct InfoRow: View {
             HStack {
                 Text(title)
                 Spacer()
-                Text("\(value)")
+                Text(String(describing: value))
                     .foregroundStyle(.gray)
             }
         } else {

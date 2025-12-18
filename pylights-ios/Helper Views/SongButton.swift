@@ -31,9 +31,11 @@ struct SongButton: View {
             
             Text(songDescriptor.artist)
                 .font(.caption)
+                .foregroundStyle(.gray)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .opacity(isPressed ? 0.8 : 1.0) // Apply the opacity pulse
+        .scaleEffect(isPressed ? 0.98 : 1.0)
         .onTapGesture(perform: onClick)
     }
     
